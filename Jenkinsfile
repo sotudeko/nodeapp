@@ -26,7 +26,7 @@ pipeline {
 
     stage('Policy Evaluation') {
       // Policy evaluation should only take place against the branch we intend to merge to
-      when { branch 'master' }
+      when { branch 'main' }
       steps {
         sh 'npm run build'  // build script using webpack and the copy-modules-webpack-plugin for easy scanning
         nexusPolicyEvaluation iqStage: 'build', iqApplication: 'npm-example',
