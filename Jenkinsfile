@@ -40,20 +40,20 @@ pipeline {
       }
     }
 
-    stage('Create package'){
-      steps {
-        script {
-          sh 'npm pack'
-        }
-      }
-    }
+  //   stage('Create package'){
+  //     steps {
+  //       script {
+  //         sh 'npm pack'
+  //       }
+  //     }
+  //   }
 
-    stage('File listing'){
-      steps {
-        script {
-          sh 'ls -l'
-        }
-      }
-    }  
-  }
+  //   stage('File listing'){
+  //     steps {
+  //       script {
+  //         sh 'ls -l'
+  //       }
+  //     }
+  //   }  
+  // }
 }   
