@@ -1,13 +1,8 @@
 pipeline {
-  agent {
-    docker {
-      // Docker image with node and git installed
-      image 'tarampampam/node:13-alpine'
-    }
-  }
+  agent any
 
   environment {
-    HOME = '.'
+    SBOM_FILE = 'bom.xml'
   }
 
   stages {
@@ -16,23 +11,49 @@ pipeline {
       steps {
         sh 'npm install'
       }
-    }
-
-    stage('Test') {
-      steps {
-        echo "Run acceptance tests to ensure that IQ remediation changes function as expected in the application"
+      post {
+        success {
+          sh 'npx auditjs@latest sbom > ${SBOM_FILE}'
+        }
       }
     }
 
-    stage('Policy Evaluation') {
-      // Policy evaluation should only take place against the branch we intend to merge to
-      when { branch 'main' }
-      steps {
-        sh 'npm run build'  // build script using webpack and the copy-modules-webpack-plugin for easy scanning
-        nexusPolicyEvaluation iqStage: 'build', iqApplication: 'npm-example',
-            iqScanPatterns: [[scanPattern: 'webpack-modules']],
-            failBuildOnNetworkError: true
+    stage('Nexus IQ Scan - Auditjs') {
+      steps {   
+        script {    
+          try {
+              def policyEvaluation = nexusPolicyEvaluation failBuildOnNetworkError: true, 
+                                      iqApplication: selectedApplication('nodeapp-aj'), 
+                                      iqScanPatterns: [[scanPattern:'${SBOM_FILE}']], 
+                                      iqStage: 'build', 
+                                      jobCredentialsId: 'admin'
+
+              echo "Nexus IQ scan succeeded: ${policyEvaluation.applicationCompositionReportUrl}"
+              IQ_SCAN_URL = "${policyEvaluation.applicationCompositionReportUrl}"
+          }
+          catch (error) {
+              def policyEvaluation = error.policyEvaluation
+              echo "Nexus IQ scan vulnerabilities detected', ${policyEvaluation.applicationCompositionReportUrl}"
+              throw error
+          }
+        }
       }
     }
+
+    stage('Create package'){
+      steps {
+        script {
+          sh 'npm pack'
+        }
+      }
+    }
+
+    stage('File listing'){
+      steps {
+        script {
+          sh 'ls -l'
+        }
+      }
+    }  
   }
 }   
