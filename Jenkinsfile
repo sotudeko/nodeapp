@@ -2,7 +2,7 @@ pipeline {
   agent any
 
   environment {
-    SBOM_FILE = 'bom.xml'
+    SBOM_FILE = "bom.xml"
   }
 
   stages {
@@ -13,7 +13,7 @@ pipeline {
       }
       post {
         success {
-          sh 'npx auditjs@latest sbom > ${SBOM_FILE}'
+          sh "npx auditjs@latest sbom > ${SBOM_FILE}"
         }
       }
     }
