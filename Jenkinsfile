@@ -24,7 +24,7 @@ pipeline {
           try {
               def policyEvaluation = nexusPolicyEvaluation failBuildOnNetworkError: true, 
                                       iqApplication: selectedApplication('nodeapp-aj'), 
-                                      iqScanPatterns: [[scanPattern:'${SBOM_FILE}']], 
+                                      iqScanPatterns: [[scanPattern:"${SBOM_FILE}"]], 
                                       iqStage: 'build', 
                                       jobCredentialsId: 'admin'
 
